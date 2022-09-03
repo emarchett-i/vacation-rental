@@ -38,7 +38,7 @@ namespace VacationRental.Api.Services
                 foreach (var booking in bookings)
                 {
                     if (booking.RentalId == rentalId
-                        && booking.StartDateTime <= date.Date && booking.StartDateTime.AddDays(booking.NumberOfNights) > date.Date)
+                        && booking.StartDate <= date.Date && booking.StartDate.AddDays(booking.NumberOfNights) > date.Date)
                     {
                         date.Bookings.Add(new CalendarBookingViewModel { Id = booking.Id });
                     }

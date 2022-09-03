@@ -6,7 +6,14 @@ namespace VacationRental.Api.Models.Booking
     {
         public int Id { get; set; }
         public int RentalId { get; set; }
-        public DateTime StartDateTime { get; set; }
+        public DateTime StartDate { get; set; }
         public int NumberOfNights { get; set; }
+        public DateTime EndDate 
+        {
+            get
+            {
+                return StartDate.AddDays(NumberOfNights);
+            }
+        }
     }
 }
