@@ -10,12 +10,11 @@ namespace VacationRental.Api.Controllers
     [ApiController]
     public class RentalsController : ControllerBase
     {
-        private readonly IDictionary<int, RentalViewModel> _rentals;
         private readonly RentalService _rentalService;
 
-        public RentalsController(IDictionary<int, RentalViewModel> rentals)
+        public RentalsController(RentalService rentalService)
         {
-            _rentals = rentals;
+            _rentalService = rentalService;
         }
 
         [HttpGet]

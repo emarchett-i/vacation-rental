@@ -10,18 +10,15 @@ namespace VacationRental.Api.Controllers
     [ApiController]
     public class BookingsController : ControllerBase
     {
-        private readonly IDictionary<int, RentalViewModel> _rentals;
-        private readonly IDictionary<int, BookingViewModel> _bookings;
         private readonly BookingService _bookingService;
+        private readonly RentalService _rentalService;
 
         public BookingsController(
-            IDictionary<int, RentalViewModel> rentals,
-            IDictionary<int, BookingViewModel> bookings,
-            BookingService bookingService)
+            BookingService bookingService,
+            RentalService rentalService)
         {
-            _rentals = rentals;
-            _bookings = bookings;
             _bookingService = bookingService;
+            _rentalService = rentalService;
 
         }
 
@@ -40,7 +37,7 @@ namespace VacationRental.Api.Controllers
         {
             if (model.Nights <= 0)
                 throw new ApplicationException("Nigts must be positive");
-            if (!_rentals.ContainsKey(model.RentalId))
+            if (!_rentalService.Exists(model.RentalId))
                 throw new ApplicationException("Rental not found");
 
             ResourceIdViewModel key = _bookingService.Create(model);

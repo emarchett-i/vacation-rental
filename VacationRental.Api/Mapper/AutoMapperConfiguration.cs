@@ -10,6 +10,7 @@ namespace VacationRental.Api.Mapper
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new BookingProfile());
+                mc.AddProfile(new RentalProfile());
             });
 
             IMapper mapper = mappingConfig.CreateMapper();
