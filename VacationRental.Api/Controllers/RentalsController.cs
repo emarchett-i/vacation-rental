@@ -37,5 +37,17 @@ namespace VacationRental.Api.Controllers
 
             return _rentalService.Create(model);
         }
+
+        [HttpPut]
+        [Route("{rentalId:int}")]
+        public void Put(int rentalId, RentalBindingModel model)
+        {
+            if (model.Units <= 0)
+                throw new ApplicationException("Units must be a positive number");
+            if (model.PreparationTimeInDays < 0)
+                throw new ApplicationException("PreparationTimeInDays can't be a negative number");
+
+            _rentalService.Update(rentalId, model);
+        }
     }
 }

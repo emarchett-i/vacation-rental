@@ -67,7 +67,12 @@ namespace VacationRental.Api.Services
             return new ResourceIdViewModel { Id = bookingId };
         }
 
-        private bool IsRentalAvailable(int rentalId, DateTime startDate, DateTime endDate, out int? nextAvailableUnit)
+        public IEnumerable<Booking> GetByRentalId(int rentalId)
+        {
+            return _bookingRepository.GetAll().Where(x => x.RentalId == rentalId);
+        }
+
+        public bool IsRentalAvailable(int rentalId, DateTime startDate, DateTime endDate, out int? nextAvailableUnit)
         {
             nextAvailableUnit = null;
 

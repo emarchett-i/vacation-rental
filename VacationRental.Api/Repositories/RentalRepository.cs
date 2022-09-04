@@ -33,6 +33,17 @@ namespace VacationRental.Api.Repositories
             return rental.Id;
         }
 
+        public void Update(Rental rental)
+        {
+            if (rental == null)
+                throw new ArgumentNullException("rental");
+
+            if (!_rentals.ContainsKey(rental.Id))
+                throw new ApplicationException("Rental not found");
+
+            _rentals[rental.Id] = rental;
+        }
+
         private int GenerateNewId()
         {
             return _rentals.Count + 1;
