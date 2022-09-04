@@ -12,8 +12,9 @@ namespace VacationRental.Api.Models.Booking
         {
             get
             {
-                return StartDate.AddDays(NumberOfNights);
+                return StartDate.Date.AddDays(NumberOfNights - 1);
             }
         }
+        public int Unit { get; set; }
     }
 }

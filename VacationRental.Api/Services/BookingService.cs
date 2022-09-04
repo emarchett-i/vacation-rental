@@ -25,6 +25,12 @@ namespace VacationRental.Api.Services
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Gets a Booking by its specified Id.
+        /// </summary>
+        /// <param name="id">The booking Id</param>
+        /// <returns>The requested Booking</returns>
+        /// <exception cref="ApplicationException"></exception>
         public BookingViewModel Get(int id)
         {
             Booking booking = _bookingRepository.Get(id);
@@ -35,32 +41,50 @@ namespace VacationRental.Api.Services
             return _mapper.Map<BookingViewModel>(booking);
         }
 
+        /// <summary>
+        /// Creates a booking if rental is available for the specified time.
+        /// </summary>
+        /// <param name="createBookingRequest">Required booking data</param>
+        /// <returns>The created resource Id</returns>
+        /// <exception cref="ApplicationException"></exception>
         public ResourceIdViewModel Create(BookingBindingModel createBookingRequest)
         {
 
             bool isRentalAvailable = IsRentalAvailable(createBookingRequest.RentalId, 
                                                        createBookingRequest.Start.Date, 
-                                                       createBookingRequest.EndDate);
+                                                       createBookingRequest.EndDate,
+                                                       out int? nextAvailableUnit);
             
             if (!isRentalAvailable)
                 throw new ApplicationException("Rental not available");
-            
-            int bookingId = _bookingRepository.Add(_mapper.Map<Booking>(createBookingRequest));
+
+            Booking booking = _mapper.Map<Booking>(createBookingRequest);
+
+            booking.Unit = nextAvailableUnit.Value;
+
+            int bookingId = _bookingRepository.Add(booking);
 
             return new ResourceIdViewModel { Id = bookingId };
         }
 
-        private bool IsRentalAvailable(int rentalId, DateTime startDate, DateTime endDate)
+        private bool IsRentalAvailable(int rentalId, DateTime startDate, DateTime endDate, out int? nextAvailableUnit)
         {
-            int occupiedRentals = _bookingRepository.GetAll()
-                .Where(r => r.RentalId == rentalId)
-                .Count(booking => startDate.IsBetween(booking.StartDate, booking.EndDate)
-                               || endDate.IsBetween(booking.StartDate, booking.EndDate)
-                               || (booking.StartDate > startDate && booking.EndDate < endDate));
+            nextAvailableUnit = null;
 
             Rental requestedRental = _rentalRepository.Get(rentalId);
 
-            return requestedRental.Units > occupiedRentals;
+            int occupiedRentals = _bookingRepository.GetAll()
+                .Where(r => r.RentalId == rentalId)
+                .Count(booking => startDate.IsBetween(booking.StartDate, booking.EndDate.AddDays(requestedRental.PreparationTimeInDays))
+                               || endDate.IsBetween(booking.StartDate, booking.EndDate.AddDays(requestedRental.PreparationTimeInDays))
+                               || (booking.StartDate > startDate && booking.EndDate.AddDays(requestedRental.PreparationTimeInDays) < endDate));
+
+            bool isRentalAvailable = requestedRental.Units > occupiedRentals;
+
+            if (isRentalAvailable)
+                nextAvailableUnit = occupiedRentals + 1;
+
+            return isRentalAvailable;
         }
     }
 }

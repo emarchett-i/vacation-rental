@@ -40,9 +40,7 @@ namespace VacationRental.Api.Controllers
             if (!_rentalService.Exists(model.RentalId))
                 throw new ApplicationException("Rental not found");
 
-            ResourceIdViewModel key = _bookingService.Create(model);
-
-            return key;
+            return _bookingService.Create(model);
         }
     }
 }

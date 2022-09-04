@@ -21,7 +21,7 @@ namespace VacationRental.Api.Models
         {
             get
             {
-                return Start.AddDays(Nights);
+                return Start.AddDays(Nights - 1);
             }
         }
     }

@@ -32,6 +32,8 @@ namespace VacationRental.Api.Controllers
         {
             if (model.Units <= 0)
                 throw new ApplicationException("Units must be a positive number");
+            if (model.PreparationTimeInDays < 0)
+                throw new ApplicationException("PreparationTimeInDays can't be a negative number");
 
             return _rentalService.Create(model);
         }
