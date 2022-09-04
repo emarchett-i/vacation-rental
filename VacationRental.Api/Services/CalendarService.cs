@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VacationRental.Api.Models;
@@ -13,29 +14,48 @@ namespace VacationRental.Api.Services
     {
         private readonly RentalRepository _rentalRepository;
         private readonly BookingRepository _bookingRepository;
+        private readonly ILogger<CalendarService> _logger;
 
         public CalendarService(RentalRepository rentalRepository,
-                               BookingRepository bookingRepository)
+                               BookingRepository bookingRepository,
+                               ILogger<CalendarService> logger)
         {
             _bookingRepository = bookingRepository;
             _rentalRepository = rentalRepository;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Gets the calendar with all the bookings for the specified rental and date range.
+        /// </summary>
+        /// <param name="rentalId">The Rental Id.</param>
+        /// <param name="start">The time range start date.</param>
+        /// <param name="nights">The number of nights.</param>
+        /// <returns></returns>
         public CalendarViewModel Get(int rentalId, DateTime start, int nights)
         {
-            var result = new CalendarViewModel
+            try
             {
-                RentalId = rentalId,
-                Dates = new List<CalendarDateViewModel>()
-            };
+                var result = new CalendarViewModel
+                {
+                    RentalId = rentalId,
+                    Dates = new List<CalendarDateViewModel>()
+                };
 
-            Rental rental = _rentalRepository.Get(rentalId);
+                Rental rental = _rentalRepository.Get(rentalId);
 
-            SetBookings(result, rental, start, nights);
+                SetBookings(result, rental, start, nights);
 
-            SetPreparationTimes(result, rental);
+                SetPreparationTimes(result, rental);
 
-            return result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error trying to get the Calendar");
+
+                throw ex;
+            }
         }
 
         private void SetBookings(CalendarViewModel calendar, Rental rental, DateTime start, int nights)

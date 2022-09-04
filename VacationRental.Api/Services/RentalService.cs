@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,58 +15,97 @@ namespace VacationRental.Api.Services
         private readonly RentalRepository _rentalRepository;
         private readonly BookingService _bookingService;
         private readonly IMapper _mapper;
+        private readonly ILogger<RentalService> _logger;
 
         public RentalService(RentalRepository rentalRepository,
                              BookingService bookingService,
-                             IMapper mapper)
+                             IMapper mapper,
+                             ILogger<RentalService> logger)
         {
             _rentalRepository = rentalRepository;
             _bookingService = bookingService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public RentalViewModel Get(int id)
         {
-            Rental rental = _rentalRepository.Get(id);
+            try
+            {
+                Rental rental = _rentalRepository.Get(id);
 
-            if (rental == null)
-                throw new ApplicationException("Rental not found");
+                if (rental == null)
+                    throw new ApplicationException("Rental not found");
 
-            return _mapper.Map<RentalViewModel>(rental);
+                return _mapper.Map<RentalViewModel>(rental);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error trying to get the Rental");
+
+                throw ex;
+            }
         }
 
         public bool Exists(int id)
         {
-            Rental rental = _rentalRepository.Get(id);
+            try
+            {
+                Rental rental = _rentalRepository.Get(id);
 
-            return rental != null;
+                return rental != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error trying to check if Rental exists");
+
+                throw ex;
+            }
         }
 
         public ResourceIdViewModel Create(RentalBindingModel rentalCreateRequest)
         {
-            Rental rental = _mapper.Map<Rental>(rentalCreateRequest);
+            try
+            {
+                Rental rental = _mapper.Map<Rental>(rentalCreateRequest);
 
-            int rentalId = _rentalRepository.Add(rental);
+                int rentalId = _rentalRepository.Add(rental);
 
-            return new ResourceIdViewModel { Id = rentalId };
+                return new ResourceIdViewModel { Id = rentalId };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error tryung to create Rental");
+
+                throw ex;
+            }
         }
 
         public void Update(int rentalId, RentalBindingModel updateRequest)
         {
-            Rental rental = _rentalRepository.Get(rentalId);
-            if (rental == null)
-                throw new ApplicationException("Rental not found");
+            try
+            {
+                Rental rental = _rentalRepository.Get(rentalId);
+                if (rental == null)
+                    throw new ApplicationException("Rental not found");
 
-            IEnumerable<Booking> rentalBookings = _bookingService.GetByRentalId(rentalId);
+                IEnumerable<Booking> rentalBookings = _bookingService.GetByRentalId(rentalId);
 
-            ValidateUnitsCanChange(updateRequest, rentalBookings);
+                ValidateUnitsCanChange(updateRequest, rentalBookings);
 
-            ValidatePreparationTimeInDaysCanChange(updateRequest, rental, rentalBookings);
+                ValidatePreparationTimeInDaysCanChange(updateRequest, rental, rentalBookings);
 
-            rental.Units = updateRequest.Units;
-            rental.PreparationTimeInDays = updateRequest.PreparationTimeInDays;
+                rental.Units = updateRequest.Units;
+                rental.PreparationTimeInDays = updateRequest.PreparationTimeInDays;
 
-            _rentalRepository.Update(rental);
+                _rentalRepository.Update(rental);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("There was an error trying to update Rental");
+
+                throw ex;
+            }
         }
 
         private void ValidateUnitsCanChange(RentalBindingModel updateRequest, IEnumerable<Booking> rentalBookings)
