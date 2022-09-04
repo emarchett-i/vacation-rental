@@ -8,11 +8,11 @@ using Xunit;
 namespace VacationRental.Api.Tests
 {
     [Collection("Integration")]
-    public class PostBookingTests
+    public class BookingTests
     {
         private readonly HttpClient _client;
 
-        public PostBookingTests(IntegrationFixture fixture)
+        public BookingTests(IntegrationFixture fixture)
         {
             _client = fixture.Client;
         }
