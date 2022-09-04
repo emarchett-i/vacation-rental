@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace VacationRental.Api.Models
 {
@@ -14,5 +15,14 @@ namespace VacationRental.Api.Models
 
         private DateTime _startIgnoreTime;
         public int Nights { get; set; }
+
+        [JsonIgnore]
+        public DateTime EndDate
+        {
+            get
+            {
+                return Start.AddDays(Nights - 1);
+            }
+        }
     }
 }

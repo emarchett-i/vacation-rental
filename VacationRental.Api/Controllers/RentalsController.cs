@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using VacationRental.Api.Models;
+using VacationRental.Api.Services;
 
 namespace VacationRental.Api.Controllers
 {
@@ -9,35 +10,44 @@ namespace VacationRental.Api.Controllers
     [ApiController]
     public class RentalsController : ControllerBase
     {
-        private readonly IDictionary<int, RentalViewModel> _rentals;
+        private readonly RentalService _rentalService;
 
-        public RentalsController(IDictionary<int, RentalViewModel> rentals)
+        public RentalsController(RentalService rentalService)
         {
-            _rentals = rentals;
+            _rentalService = rentalService;
         }
 
         [HttpGet]
         [Route("{rentalId:int}")]
         public RentalViewModel Get(int rentalId)
         {
-            if (!_rentals.ContainsKey(rentalId))
-                throw new ApplicationException("Rental not found");
+            if (rentalId == 0)
+                throw new ApplicationException("Rental Id can't be 0");
 
-            return _rentals[rentalId];
+            return _rentalService.Get(rentalId);
         }
 
         [HttpPost]
         public ResourceIdViewModel Post(RentalBindingModel model)
         {
-            var key = new ResourceIdViewModel { Id = _rentals.Keys.Count + 1 };
+            if (model.Units <= 0)
+                throw new ApplicationException("Units must be a positive number");
+            if (model.PreparationTimeInDays < 0)
+                throw new ApplicationException("PreparationTimeInDays can't be a negative number");
 
-            _rentals.Add(key.Id, new RentalViewModel
-            {
-                Id = key.Id,
-                Units = model.Units
-            });
+            return _rentalService.Create(model);
+        }
 
-            return key;
+        [HttpPut]
+        [Route("{rentalId:int}")]
+        public void Put(int rentalId, RentalBindingModel model)
+        {
+            if (model.Units <= 0)
+                throw new ApplicationException("Units must be a positive number");
+            if (model.PreparationTimeInDays < 0)
+                throw new ApplicationException("PreparationTimeInDays can't be a negative number");
+
+            _rentalService.Update(rentalId, model);
         }
     }
 }
