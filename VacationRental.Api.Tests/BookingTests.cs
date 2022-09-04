@@ -98,5 +98,101 @@ namespace VacationRental.Api.Tests
                 }
             });
         }
+
+        [Fact]
+        public async Task GivenCompleteRequest_WhenPostBooking_WithPreparationTimeInDays_ShouldCreateBookingCorrectly()
+        {
+            var postRentalRequest = new RentalBindingModel
+            {
+                Units = 1,
+                PreparationTimeInDays = 3
+            };
+
+            ResourceIdViewModel postRentalResult;
+            using (var postRentalResponse = await _client.PostAsJsonAsync($"/api/v1/rentals", postRentalRequest))
+            {
+                Assert.True(postRentalResponse.IsSuccessStatusCode);
+                postRentalResult = await postRentalResponse.Content.ReadAsAsync<ResourceIdViewModel>();
+            }
+
+            var postBooking1Request = new BookingBindingModel
+            {
+                RentalId = postRentalResult.Id,
+                Nights = 1,
+                Start = new DateTime(2002, 01, 01)
+            };
+
+            using (var postBooking1Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking1Request))
+            {
+                Assert.True(postBooking1Response.IsSuccessStatusCode);
+            }
+
+            var postBooking2Request = new BookingBindingModel
+            {
+                RentalId = postRentalResult.Id,
+                Nights = 1,
+                Start = new DateTime(2002, 01, 05)
+            };
+
+            ResourceIdViewModel postBooking2Result;
+            using (var postBooking2Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking2Request))
+            {
+                Assert.True(postBooking2Response.IsSuccessStatusCode);
+                postBooking2Result = await postBooking2Response.Content.ReadAsAsync<ResourceIdViewModel>();
+            }
+
+            using (var getBookingResponse = await _client.GetAsync($"/api/v1/bookings/{postBooking2Result.Id}"))
+            {
+                Assert.True(getBookingResponse.IsSuccessStatusCode);
+
+                var getBookingResult = await getBookingResponse.Content.ReadAsAsync<BookingViewModel>();
+                Assert.Equal(postBooking2Request.RentalId, getBookingResult.RentalId);
+                Assert.Equal(postBooking2Request.Nights, getBookingResult.Nights);
+                Assert.Equal(postBooking2Request.Start, getBookingResult.Start);
+            }
+        }
+
+        [Fact]
+        public async Task GivenCompleteRequest_WhenPostBooking_WithPreparationTime_ThenAPostReturnsErrorWhenThereIsOverbooking()
+        {
+            var postRentalRequest = new RentalBindingModel
+            {
+                Units = 1,
+                PreparationTimeInDays = 3
+            };
+
+            ResourceIdViewModel postRentalResult;
+            using (var postRentalResponse = await _client.PostAsJsonAsync($"/api/v1/rentals", postRentalRequest))
+            {
+                Assert.True(postRentalResponse.IsSuccessStatusCode);
+                postRentalResult = await postRentalResponse.Content.ReadAsAsync<ResourceIdViewModel>();
+            }
+
+            var postBooking1Request = new BookingBindingModel
+            {
+                RentalId = postRentalResult.Id,
+                Nights = 1,
+                Start = new DateTime(2002, 01, 01)
+            };
+
+            using (var postBooking1Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking1Request))
+            {
+                Assert.True(postBooking1Response.IsSuccessStatusCode);
+            }
+
+            var postBooking2Request = new BookingBindingModel
+            {
+                RentalId = postRentalResult.Id,
+                Nights = 1,
+                Start = new DateTime(2002, 01, 04)
+            };
+
+            await Assert.ThrowsAsync<ApplicationException>(async () =>
+            {
+                using (var postBooking2Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking2Request))
+                {
+                }
+            });
+        }
     }
 }
