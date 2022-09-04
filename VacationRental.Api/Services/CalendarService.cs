@@ -6,18 +6,18 @@ using VacationRental.Api.Models;
 using VacationRental.Api.Models.Booking;
 using VacationRental.Api.Models.Calendar;
 using VacationRental.Api.Models.Rental;
-using VacationRental.Api.Repositories;
+using VacationRental.Api.Repositories.Contracts;
 
 namespace VacationRental.Api.Services
 {
     public class CalendarService
     {
-        private readonly RentalRepository _rentalRepository;
-        private readonly BookingRepository _bookingRepository;
+        private readonly IRentalRepository _rentalRepository;
+        private readonly IBookingRepository _bookingRepository;
         private readonly ILogger<CalendarService> _logger;
 
-        public CalendarService(RentalRepository rentalRepository,
-                               BookingRepository bookingRepository,
+        public CalendarService(IRentalRepository rentalRepository,
+                               IBookingRepository bookingRepository,
                                ILogger<CalendarService> logger)
         {
             _bookingRepository = bookingRepository;

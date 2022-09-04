@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 using System.Collections.Generic;
 using VacationRental.Api.Mapper;
-using VacationRental.Api.Models;
 using VacationRental.Api.Models.Booking;
 using VacationRental.Api.Models.Rental;
 using VacationRental.Api.Repositories;
+using VacationRental.Api.Repositories.Contracts;
 using VacationRental.Api.Services;
 
 namespace VacationRental.Api
@@ -38,8 +37,8 @@ namespace VacationRental.Api
             services.AddScoped<CalendarService, CalendarService>();
             services.AddScoped<RentalService, RentalService>();
 
-            services.AddScoped<BookingRepository, BookingRepository>();
-            services.AddScoped<RentalRepository, RentalRepository>();
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IRentalRepository, RentalRepository>();
 
             // Auto Mapper Configurations
             services.AddAutoMapper();

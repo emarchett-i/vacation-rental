@@ -6,18 +6,18 @@ using System.Linq;
 using VacationRental.Api.Models;
 using VacationRental.Api.Models.Booking;
 using VacationRental.Api.Models.Rental;
-using VacationRental.Api.Repositories;
+using VacationRental.Api.Repositories.Contracts;
 
 namespace VacationRental.Api.Services
 {
     public class RentalService
     {
-        private readonly RentalRepository _rentalRepository;
+        private readonly IRentalRepository _rentalRepository;
         private readonly BookingService _bookingService;
         private readonly IMapper _mapper;
         private readonly ILogger<RentalService> _logger;
 
-        public RentalService(RentalRepository rentalRepository,
+        public RentalService(IRentalRepository rentalRepository,
                              BookingService bookingService,
                              IMapper mapper,
                              ILogger<RentalService> logger)

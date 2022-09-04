@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using VacationRental.Api.Models.Rental;
+using VacationRental.Api.Repositories.Contracts;
 
 namespace VacationRental.Api.Repositories
 {
-    public class RentalRepository
+    public class RentalRepository : IRentalRepository
     {
         private readonly IDictionary<int, Rental> _rentals;
 
